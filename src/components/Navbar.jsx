@@ -1,12 +1,10 @@
 // src/components/Navbar.jsx
-import React from 'react';
-
 const Navbar = ({ activeTab, setActiveTab }) => {
   const tabs = [
-    { id: 'movies', label: 'Phim' },
-    { id: 'theaters', label: 'Rạp' },
-    { id: 'members', label: 'Thành viên' },
-    { id: 'rules', label: 'Luật' },
+    { id: "movies", label: "Phim" },
+    { id: "theaters", label: "Rạp" },
+    { id: "members", label: "Thành viên" },
+    { id: "rules", label: "Luật" },
   ];
 
   return (
@@ -14,7 +12,7 @@ const Navbar = ({ activeTab, setActiveTab }) => {
       {tabs.map((tab) => (
         <button
           key={tab.id}
-          className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
+          className={`nav-item ${activeTab === tab.id ? "active" : ""}`}
           onClick={() => setActiveTab(tab.id)}
         >
           {tab.label}
