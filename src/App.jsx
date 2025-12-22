@@ -1,13 +1,13 @@
-// src/App.jsx
 import { useState } from 'react';
 import Navbar from './components/Navbar';
 import './App.css';
 
-// --- IMPORT CÁC TRANG CỦA BẠN ---
-import BookingFlow from './pages/BookingFlow'; // Trang Phim & Đặt vé
-import Theaters from './pages/Theaters';       // Trang Rạp
-import Members from './pages/Members';         // Trang Thành viên
-import Rules from './pages/Rules';             // Trang Luật
+// --- IMPORT CÁC TRANG (PAGES) ---
+// Đảm bảo tên file trong thư mục 'pages' viết hoa chữ cái đầu đúng như thế này
+import BookingFlow from './pages/BookingFlow'; 
+import Theaters from './pages/Theaters';       
+import Members from './pages/Members';         
+import Rules from './pages/Rules';             
 
 function App() {
   // State quản lý tab nào đang được chọn (mặc định là 'phim')
@@ -18,7 +18,7 @@ function App() {
       <header>
         <h1 className="logo">CINEMA STAR</h1>
         
-        {/* Truyền hàm setActiveTab xuống Navbar để đổi tab */}
+        {/* Navbar nhận props để điều khiển việc chuyển tab */}
         <Navbar 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
@@ -26,18 +26,18 @@ function App() {
       </header>
 
       <div className="container">
-        {/* --- ĐIỀU HƯỚNG HIỂN THỊ (ROUTING) --- */}
+        {/* --- KHU VỰC HIỂN THỊ NỘI DUNG THEO TAB --- */}
 
-        {/* 1. Tab PHIM: Gọi BookingFlow (Đã có sẵn tìm kiếm và list phim) */}
+        {/* 1. Tab PHIM: Gọi BookingFlow (Chứa logic Tìm kiếm, List phim, Mua vé, Chi tiết) */}
         {activeTab === 'phim' && <BookingFlow />}
 
-        {/* 2. Tab RẠP */}
+        {/* 2. Tab RẠP: Hiển thị danh sách rạp */}
         {activeTab === 'rap' && <Theaters />}
 
-        {/* 3. Tab THÀNH VIÊN */}
+        {/* 3. Tab THÀNH VIÊN: Hiển thị đăng nhập/đăng ký */}
         {activeTab === 'member' && <Members />}
 
-        {/* 4. Tab LUẬT */}
+        {/* 4. Tab LUẬT: Hiển thị nội quy */}
         {activeTab === 'luat' && <Rules />}
         
       </div>
