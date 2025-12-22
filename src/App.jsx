@@ -1,46 +1,66 @@
 // src/App.jsx
 import { useState } from 'react';
+import Navbar from './components/Navbar';
 import './App.css';
 
-import Navbar from './components/Navbar';
-import BookingFlow from './pages/BookingFlow';
-import Theaters from './pages/Theaters';
-import Members from './pages/Members';
-import Rules from './pages/Rules';
+// --- 1. IMPORT THƯ VIỆN TOASTIFY ---
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+// -----------------------------------
+
+// --- IMPORT CÁC TRANG (PAGES) ---
+import BookingFlow from './pages/BookingFlow'; 
+import Theaters from './pages/Theaters';       
+import Members from './pages/Members';         
+import Rules from './pages/Rules';             
 
 function App() {
-  const [activeTab, setActiveTab] = useState('movies');
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'movies':
-        return <BookingFlow />;
-      case 'theaters':
-        return <Theaters />;
-      case 'members':
-        return <Members />;
-      case 'rules':
-        return <Rules />;
-      default:
-        return <BookingFlow />;
-    }
-  };
+  // State quản lý tab nào đang được chọn (mặc định là 'phim')
+  const [activeTab, setActiveTab] = useState('phim');
 
   return (
-    <div className="container">
+    <div className="App">
+      {/* --- 2. CẤU HÌNH KHUNG HIỂN THỊ THÔNG BÁO --- */}
+      {/* Khung này sẽ nằm ẩn, chỉ hiện khi bạn gọi lệnh toast() */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}       // Tự tắt sau 3 giây
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"           // Giao diện tối (Dark mode)
+      />
+      {/* ------------------------------------------- */}
+
       <header>
-        <h1 
-          style={{ cursor: 'pointer' }} 
-          onClick={() => setActiveTab('movies')}
-        >
-          CINEMA STAR
-        </h1>
+        <h1 className="logo">CINEMA STAR</h1>
+        
+        {/* Navbar nhận props để điều khiển việc chuyển tab */}
+        <Navbar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+        />
       </header>
 
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="container">
+        {/* --- KHU VỰC HIỂN THỊ NỘI DUNG THEO TAB --- */}
 
-      <div className="content-area">
-        {renderContent()}
+        {/* 1. Tab PHIM: Gọi BookingFlow */}
+        {activeTab === 'phim' && <BookingFlow />}
+
+        {/* 2. Tab RẠP: Hiển thị danh sách rạp */}
+        {activeTab === 'rap' && <Theaters />}
+
+        {/* 3. Tab THÀNH VIÊN: Hiển thị đăng nhập/đăng ký */}
+        {activeTab === 'member' && <Members />}
+
+        {/* 4. Tab LUẬT: Hiển thị nội quy */}
+        {activeTab === 'luat' && <Rules />}
+        
       </div>
     </div>
   );

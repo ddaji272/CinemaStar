@@ -2,25 +2,27 @@
 import React from 'react';
 
 const Navbar = ({ activeTab, setActiveTab }) => {
-  const tabs = [
-    { id: 'movies', label: 'Phim' },
-    { id: 'theaters', label: 'Rạp' },
-    { id: 'members', label: 'Thành viên' },
-    { id: 'rules', label: 'Luật' },
+  const navItems = [
+    { id: 'phim', label: 'PHIM' },
+    { id: 'rap', label: 'RẠP' },
+    { id: 'member', label: 'THÀNH VIÊN' },
+    { id: 'luat', label: 'LUẬT' },
   ];
 
   return (
-    <nav className="nav-menu">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
-          onClick={() => setActiveTab(tab.id)}
-        >
-          {tab.label}
-        </button>
+    <ul className="nav-menu">
+      {navItems.map((item) => (
+        <li key={item.id}>
+          {/* Sử dụng button thay vì thẻ a để tránh load lại trang */}
+          <button
+            className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(item.id)}
+          >
+            {item.label}
+          </button>
+        </li>
       ))}
-    </nav>
+    </ul>
   );
 };
 
