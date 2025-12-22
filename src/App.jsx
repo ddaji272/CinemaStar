@@ -1,97 +1,43 @@
+// src/App.jsx
 import { useState } from 'react';
 import Navbar from './components/Navbar';
-import { MOVIES } from './data/movieData';
 import './App.css';
 
-// --- IMPORT CÁC TRANG TỪ THƯ MỤC PAGES CỦA BẠN ---
-// (Dựa trên ảnh cây thư mục bạn gửi: Theaters.jsx, Members.jsx, Rules.jsx)
-import Theaters from './pages/Theaters';
-import Members from './pages/Members';
-import Rules from './pages/Rules';
+// --- IMPORT CÁC TRANG CỦA BẠN ---
+import BookingFlow from './pages/BookingFlow'; // Trang Phim & Đặt vé
+import Theaters from './pages/Theaters';       // Trang Rạp
+import Members from './pages/Members';         // Trang Thành viên
+import Rules from './pages/Rules';             // Trang Luật
 
 function App() {
+  // State quản lý tab nào đang được chọn (mặc định là 'phim')
   const [activeTab, setActiveTab] = useState('phim');
-  const [showLogin, setShowLogin] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Hàm xử lý tìm kiếm phim
-  const filteredMovies = MOVIES.filter((movie) =>
-    movie.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Hàm xử lý khi bấm nút "Mua Vé" (Tạm thời hiện thông báo để test nút có chạy không)
-  const handleBuyTicket = (movieName) => {
-    alert(`Bạn đã bấm mua vé phim: ${movieName}\n(Chức năng đặt vé sẽ cập nhật sau)`);
-  };
 
   return (
     <div className="App">
       <header>
         <h1 className="logo">CINEMA STAR</h1>
         
-        {/* Navbar truyền props để chuyển Tab */}
+        {/* Truyền hàm setActiveTab xuống Navbar để đổi tab */}
         <Navbar 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
-          setShowLogin={setShowLogin}
         />
       </header>
 
       <div className="container">
-        
-        {/* --- TAB 1: PHIM --- */}
-        {activeTab === 'phim' && (
-           <div className="movie-section">
-              <div className="search-container">
-                  <input 
-                    type="text" 
-                    placeholder="Tìm tên phim..." 
-                    className="search-input" 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-              </div>
+        {/* --- ĐIỀU HƯỚNG HIỂN THỊ (ROUTING) --- */}
 
-              <h2 style={{color: 'white', marginBottom: '20px'}}>DANH SÁCH PHIM ĐANG CHIẾU</h2>
-              
-              <div className="movie-list">
-                {filteredMovies.map((movie) => (
-                  <div key={movie.id} className="movie-card">
-                    <div className="poster-wrapper">
-                      <img src={movie.image} alt={movie.title} className="movie-poster" />
-                      
-                      <div className="overlay">
-                        {/* Gán sự kiện onClick để nút hoạt động */}
-                        <button 
-                            className="btn-overlay btn-buy"
-                            onClick={() => handleBuyTicket(movie.title)}
-                        >
-                            MUA VÉ
-                        </button>
-                        <button className="btn-overlay btn-details">CHI TIẾT</button>
-                      </div>
-                    </div>
-                    
-                    <div className="movie-info">
-                      <h3>{movie.title}</h3>
-                      <p style={{ color: '#a0aec0', margin: '5px 0' }}>{movie.duration}</p>
-                      <p style={{ color: '#fbbf24', fontWeight: 'bold' }}>
-                        {movie.price.toLocaleString()} đ
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-           </div>
-        )}
+        {/* 1. Tab PHIM: Gọi BookingFlow (Đã có sẵn tìm kiếm và list phim) */}
+        {activeTab === 'phim' && <BookingFlow />}
 
-        {/* --- TAB 2: RẠP (Gọi component Theaters từ thư mục pages) --- */}
+        {/* 2. Tab RẠP */}
         {activeTab === 'rap' && <Theaters />}
-        
-        {/* --- TAB 3: THÀNH VIÊN (Gọi component Members từ thư mục pages) --- */}
+
+        {/* 3. Tab THÀNH VIÊN */}
         {activeTab === 'member' && <Members />}
-        
-        {/* --- TAB 4: LUẬT (Gọi component Rules từ thư mục pages) --- */}
+
+        {/* 4. Tab LUẬT */}
         {activeTab === 'luat' && <Rules />}
         
       </div>
