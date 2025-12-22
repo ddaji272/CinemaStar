@@ -1,26 +1,35 @@
-// src/App.jsx
 import { useState } from 'react';
-import Navbar from './components/Navbar'; 
-import { MOVIES } from './data/movieData'; // Import dữ liệu phim
+import Navbar from './components/Navbar';
+import { MOVIES } from './data/movieData';
 import './App.css';
+
+// --- IMPORT CÁC TRANG TỪ THƯ MỤC PAGES CỦA BẠN ---
+// (Dựa trên ảnh cây thư mục bạn gửi: Theaters.jsx, Members.jsx, Rules.jsx)
+import Theaters from './pages/Theaters';
+import Members from './pages/Members';
+import Rules from './pages/Rules';
 
 function App() {
   const [activeTab, setActiveTab] = useState('phim');
   const [showLogin, setShowLogin] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(""); // State cho ô tìm kiếm
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Lọc phim theo từ khóa tìm kiếm
+  // Hàm xử lý tìm kiếm phim
   const filteredMovies = MOVIES.filter((movie) =>
     movie.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Hàm xử lý khi bấm nút "Mua Vé" (Tạm thời hiện thông báo để test nút có chạy không)
+  const handleBuyTicket = (movieName) => {
+    alert(`Bạn đã bấm mua vé phim: ${movieName}\n(Chức năng đặt vé sẽ cập nhật sau)`);
+  };
+
   return (
     <div className="App">
       <header>
-        {/* Logo */}
         <h1 className="logo">CINEMA STAR</h1>
         
-        {/* Navbar */}
+        {/* Navbar truyền props để chuyển Tab */}
         <Navbar 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
@@ -29,10 +38,10 @@ function App() {
       </header>
 
       <div className="container">
-        {/* --- TAB PHIM --- */}
+        
+        {/* --- TAB 1: PHIM --- */}
         {activeTab === 'phim' && (
            <div className="movie-section">
-              {/* Ô tìm kiếm */}
               <div className="search-container">
                   <input 
                     type="text" 
@@ -45,25 +54,27 @@ function App() {
 
               <h2 style={{color: 'white', marginBottom: '20px'}}>DANH SÁCH PHIM ĐANG CHIẾU</h2>
               
-              {/* LƯỚI PHIM (Hiển thị từ dữ liệu MOVIES) */}
               <div className="movie-list">
                 {filteredMovies.map((movie) => (
                   <div key={movie.id} className="movie-card">
                     <div className="poster-wrapper">
                       <img src={movie.image} alt={movie.title} className="movie-poster" />
                       
-                      {/* Lớp phủ khi rê chuột vào (Overlay) */}
                       <div className="overlay">
-                        <button className="btn-overlay btn-buy">MUA VÉ</button>
+                        {/* Gán sự kiện onClick để nút hoạt động */}
+                        <button 
+                            className="btn-overlay btn-buy"
+                            onClick={() => handleBuyTicket(movie.title)}
+                        >
+                            MUA VÉ
+                        </button>
                         <button className="btn-overlay btn-details">CHI TIẾT</button>
                       </div>
                     </div>
                     
                     <div className="movie-info">
                       <h3>{movie.title}</h3>
-                      <p style={{ color: '#a0aec0', margin: '5px 0' }}>
-                        {movie.duration}
-                      </p>
+                      <p style={{ color: '#a0aec0', margin: '5px 0' }}>{movie.duration}</p>
                       <p style={{ color: '#fbbf24', fontWeight: 'bold' }}>
                         {movie.price.toLocaleString()} đ
                       </p>
@@ -74,16 +85,15 @@ function App() {
            </div>
         )}
 
-        {/* --- CÁC TAB KHÁC --- */}
-        {activeTab === 'rap' && <h2 style={{color: 'white', textAlign: 'center'}}>HỆ THỐNG RẠP (Đang cập nhật)</h2>}
+        {/* --- TAB 2: RẠP (Gọi component Theaters từ thư mục pages) --- */}
+        {activeTab === 'rap' && <Theaters />}
         
-        {activeTab === 'member' && (
-            <div className="member-container">
-                <h2 style={{color: 'white'}}>KHU VỰC THÀNH VIÊN</h2>
-            </div>
-        )}
+        {/* --- TAB 3: THÀNH VIÊN (Gọi component Members từ thư mục pages) --- */}
+        {activeTab === 'member' && <Members />}
         
-        {activeTab === 'luat' && <h2 style={{color: 'white', textAlign: 'center'}}>QUY ĐỊNH & ĐIỀU KHOẢN</h2>}
+        {/* --- TAB 4: LUẬT (Gọi component Rules từ thư mục pages) --- */}
+        {activeTab === 'luat' && <Rules />}
+        
       </div>
     </div>
   );
