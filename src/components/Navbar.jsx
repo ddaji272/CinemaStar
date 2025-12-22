@@ -1,70 +1,67 @@
 // src/components/Navbar.jsx
 import React from 'react';
 
-const Navbar = ({ activeTab, setActiveTab, user, onOpenAuth, onLogout, onGoToAdmin }) => {
+// Lưu ý: props nhận vào là onTabChange chứ không phải setActiveTab nữa
+const Navbar = ({ activeTab, onTabChange, user, onLogout, onGoToAdmin }) => {
   return (
-    <nav className="navbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #333' }}>
+    <nav className="navbar">
       
-      {/* MENU BÊN TRÁI: Các tab điều hướng */}
+      {/* MENU CHÍNH */}
       <div className="nav-links">
         <button 
           className={activeTab === 'movies' ? 'active' : ''} 
-          onClick={() => setActiveTab('movies')}
+          onClick={() => onTabChange('movies')}
         >
           Lịch chiếu
         </button>
         <button 
           className={activeTab === 'theaters' ? 'active' : ''} 
-          onClick={() => setActiveTab('theaters')}
+          onClick={() => onTabChange('theaters')}
         >
           Hệ thống rạp
         </button>
+        
+        {/* Tab Thành viên: Bấm vào đây sẽ kích hoạt logic kiểm tra đăng nhập */}
         <button 
           className={activeTab === 'members' ? 'active' : ''} 
-          onClick={() => setActiveTab('members')}
+          onClick={() => onTabChange('members')}
         >
           Thành viên
         </button>
+        
         <button 
           className={activeTab === 'rules' ? 'active' : ''} 
-          onClick={() => setActiveTab('rules')}
+          onClick={() => onTabChange('rules')}
         >
           Quy định
         </button>
       </div>
 
-      {/* MENU BÊN PHẢI: Xử lý Đăng nhập / User / Admin */}
+      {/* MENU BÊN PHẢI: CHỈ HIỆN KHI ĐÃ ĐĂNG NHẬP */}
       <div className="auth-action">
-        {user ? (
+        {user && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             
-            {/* Nút vào trang Admin (Chỉ hiện khi role là admin) */}
             {user.role === 'admin' && (
               <button 
                 onClick={() => onGoToAdmin(true)}
-                style={{ background: '#e50914', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
+                className="btn-admin"
               >
-                ⚙️ TRANG ADMIN
+                ⚙️ Admin
               </button>
             )}
 
-            <span style={{ color: 'white' }}>Xin chào, <b style={{ color: '#fbbf24' }}>{user.username}</b></span>
+            <span style={{ color: '#e5e7eb' }}>Hi, <b style={{ color: '#fbbf24' }}>{user.username}</b></span>
             
             <button 
               onClick={onLogout}
-              style={{ background: 'transparent', border: '1px solid #718096', color: '#a0aec0', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
+              className="btn-logout"
             >
-              Đăng xuất
+              Thoát
             </button>
           </div>
-        ) : (
-          <button 
-            onClick={onOpenAuth}
-            style={{ background: '#fbbf24', border: 'none', color: 'black', padding: '8px 20px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
-          >
-            Đăng nhập / Đăng ký
-          </button>
         )}
+        {/* Đã XÓA hoàn toàn phần else (nút đăng nhập màu vàng) */}
       </div>
     </nav>
   );
