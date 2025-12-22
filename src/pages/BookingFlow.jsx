@@ -2,13 +2,17 @@
 import React, { useState } from 'react';
 import { MOVIES, TOTAL_SEATS } from '../data/movieData';
 
+// --- SỬA 1: IMPORT TOAST ĐỂ HIỆN THÔNG BÁO ---
+import { toast } from 'react-toastify'; 
+
 // Import các component con
 import TheaterSelection from '../components/Booking/TheaterSelection';
 import SeatSelection from '../components/Booking/SeatSelection';
 import PaymentInfo from '../components/Booking/PaymentInfo';
 import FormatSelection from '../components/Booking/FormatSelection';
 
-const BookingFlow = () => {
+// --- SỬA 2: NHẬN PROPS currentUser VÀ onSwitchTab ---
+const BookingFlow = ({ currentUser, onSwitchTab }) => {
   // --- STATE QUẢN LÝ LUỒNG ĐẶT VÉ ---
   // 0: Home -> 1: Format -> 2: Rạp -> 3: Ghế -> 4: Thanh toán
   const [step, setStep] = useState(0); 
@@ -31,6 +35,16 @@ const BookingFlow = () => {
 
   // B1: Từ Home -> Chọn Phim xong -> Sang bước 1 (Chọn Định dạng)
   const handleStartBooking = (movie) => {
+    // --- SỬA 3: KIỂM TRA ĐĂNG NHẬP Ở ĐÂY ---
+    // Nếu chưa có user thì chặn lại, báo lỗi và chuyển sang tab Member
+    if (!currentUser) {
+      toast.warn("⚠️ Bạn vui lòng đăng nhập để tiếp tục mua vé!");
+      onSwitchTab('member'); // Chuyển sang tab Đăng nhập
+      setViewingDetails(null); // Tắt modal chi tiết nếu đang mở
+      return; // Dừng lại, không chạy tiếp code bên dưới
+    }
+    // ----------------------------------------
+
     setBookingData({ movie, format: null, theater: null, showtime: null, seats: [] });
     setViewingDetails(null);
     setStep(1); 
@@ -63,7 +77,8 @@ const BookingFlow = () => {
 
   // B4: Thanh toán thành công -> Về lại trang chủ
   const handlePaymentSuccess = () => {
-    alert(`Thanh toán thành công!\nPhim: ${bookingData.movie.title}\nĐịnh dạng: ${bookingData.format}\nTổng tiền: ${(bookingData.seats.length * bookingData.movie.price).toLocaleString()}đ`);
+    // Thay alert bằng toast cho đẹp luôn
+    toast.success(`🎉 Đặt vé thành công! Phim: ${bookingData.movie.title}`);
     setBookingData({ movie: null, theater: null, showtime: null, seats: [] });
     setStep(0);
   };
