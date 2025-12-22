@@ -4,7 +4,9 @@ import { toast } from "react-toastify";
 
 const API_BASE = "https://cinestarbackend.onrender.com";
 
-const Members = () => {
+// --- SỬA 1: Nhận prop onUserChange từ App.jsx ---
+const Members = ({ onUserChange }) => {
+  
   // State giao diện
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -72,6 +74,9 @@ const Members = () => {
       // 2. Cập nhật localStorage để F5 không bị mất
       localStorage.setItem("user_info", JSON.stringify(data.user));
       
+      // --- SỬA 2: Báo cho App biết thông tin mới ---
+      if (onUserChange) onUserChange(data.user);
+
       setIsEditing(false); // Tắt chế độ sửa
     } catch (err) {
       toast.error(err.message);
@@ -97,7 +102,7 @@ const Members = () => {
     } catch (err) { toast.error(err.message); } finally { setLoading(false); }
   };
 
-  // --- LOGIC ĐĂNG NHẬP (Giữ nguyên) ---
+  // --- LOGIC ĐĂNG NHẬP ---
   const handleLogin = async () => {
     if (!formData.email || !formData.password) { setError("Nhập email/pass"); return; }
     setLoading(true); setError("");
@@ -118,6 +123,10 @@ const Members = () => {
         address: data.address || ""
       });
       toast.success(`🍿 Xin chào ${data.name}`);
+
+      // --- SỬA 3: QUAN TRỌNG NHẤT - Báo cho App biết đã Login ---
+      if (onUserChange) onUserChange(data);
+
     } catch (err) { toast.error(err.message); } finally { setLoading(false); }
   };
 
@@ -125,6 +134,10 @@ const Members = () => {
     localStorage.removeItem("user_info");
     setCurrentUser(null);
     setIsEditing(false);
+    
+    // --- SỬA 4: Báo cho App biết đã Logout ---
+    if (onUserChange) onUserChange(null);
+    
     toast.info("Đã đăng xuất");
   };
 
