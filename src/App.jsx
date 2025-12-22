@@ -13,7 +13,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Pages
-import AdminDashboard from "./pages/AdminDashBoard"; // Admin Dashboard
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin"; // The new page
 import BookingFlow from "./pages/BookingFlow";
 import Theaters from "./pages/Theaters";
