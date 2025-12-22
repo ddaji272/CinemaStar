@@ -14,7 +14,7 @@ const AdminLogin = () => {
     try {
       // Call the specific Admin Login API we created earlier
       const res = await axios.post(
-        "http://localhost:5000/api/auth/admin/login",
+        "https://cinestarbackend.onrender.com/api/auth/admin/login",
         {
           email,
           password,
@@ -77,7 +77,7 @@ const AdminLogin = () => {
           <button className="btn btn-warning w-100 fw-bold">ĐĂNG NHẬP</button>
         </form>
         <div className="text-center mt-3">
-          <a href="/" className="text-muted text-decoration-none small">
+          <a href="/" className="text-white text-decoration-none small">
             ← Quay lại trang chủ
           </a>
         </div>
