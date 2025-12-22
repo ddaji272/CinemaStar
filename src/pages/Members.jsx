@@ -1,7 +1,7 @@
 // src/pages/Members.jsx
 import { useState, useEffect } from "react";
 
-// Cấu hình đường dẫn API dựa trên server.js bạn gửi
+// Cấu hình đường dẫn API chuẩn theo backend của bạn
 const API_BASE = "https://cinestarbackend.onrender.com";
 
 const Members = () => {
@@ -46,13 +46,14 @@ const Members = () => {
     }
 
     setLoading(true);
+    setError(""); // Reset lỗi trước khi gọi
+
     try {
-      // Gọi API: /api/auth/register (theo file routes/auth.js)
       const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fullName: formData.fullName, // Backend auth.js yêu cầu 'fullName'
+          fullName: formData.fullName,
           email: formData.email,
           password: formData.password
         }),
@@ -61,15 +62,14 @@ const Members = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        // Backend auth.js trả về lỗi dạng { msg: "..." }
         throw new Error(data.msg || "Đăng ký thất bại");
       }
 
       alert("Đăng ký thành công! Bạn có thể đăng nhập ngay.");
       setIsRegister(false); // Chuyển về form đăng nhập
-      setFormData({ fullName: "", email: "", password: "", confirmPassword: "" });
+      setFormData(prev => ({ ...prev, password: "", confirmPassword: "" }));
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Lỗi kết nối server (Có thể server đang khởi động, vui lòng thử lại)");
     } finally {
       setLoading(false);
     }
@@ -83,8 +83,9 @@ const Members = () => {
     }
 
     setLoading(true);
+    setError("");
+
     try {
-      // Gọi API: /api/auth/login (theo file routes/auth.js)
       const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -97,18 +98,16 @@ const Members = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        // Backend trả về 400 nếu sai pass, msg nằm trong data.msg
         throw new Error(data.msg || "Đăng nhập thất bại");
       }
 
-      // Backend auth.js trả về: { msg, role, userId, name }
       // Lưu thông tin này vào máy để nhớ đăng nhập
       localStorage.setItem("user_info", JSON.stringify(data));
       setCurrentUser(data);
       alert(`Đăng nhập thành công! Xin chào ${data.name}`);
 
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Lỗi kết nối server (Có thể server đang khởi động, vui lòng thử lại)");
     } finally {
       setLoading(false);
     }
@@ -123,7 +122,8 @@ const Members = () => {
 
   return (
     <div className="member-container">
-      <div className="login-box">
+      {/* THÊM style zIndex: 10 để đảm bảo khung đăng nhập nằm trên các lớp nền khác */}
+      <div className="login-box" style={{ position: "relative", zIndex: 10 }}>
         
         {/* === LOGIC HIỂN THỊ: NẾU CÓ USER -> HIỆN THÔNG TIN, CHƯA CÓ -> HIỆN FORM === */}
         {currentUser ? (
@@ -137,7 +137,7 @@ const Members = () => {
             
             <button
               className="btn-checkout"
-              style={{ width: "100%", marginTop: "30px", backgroundColor: "#e50914" }}
+              style={{ width: "100%", marginTop: "30px", backgroundColor: "#e50914", cursor: "pointer", position: "relative", zIndex: 20 }}
               onClick={handleLogout}
             >
               Đăng Xuất
@@ -157,7 +157,7 @@ const Members = () => {
 
             {/* Hiển thị lỗi nếu có */}
             {error && (
-              <p style={{ color: "#ff4d4f", background: "rgba(255,0,0,0.1)", padding: "8px", borderRadius: "4px", fontSize: "0.9rem" }}>
+              <p style={{ color: "#ff4d4f", background: "rgba(255,0,0,0.1)", padding: "8px", borderRadius: "4px", fontSize: "0.9rem", border: "1px solid #ff4d4f" }}>
                 ⚠️ {error}
               </p>
             )}
@@ -212,16 +212,27 @@ const Members = () => {
 
             <button
               className="btn-checkout"
-              style={{ width: "100%", marginTop: "10px", opacity: loading ? 0.7 : 1 }}
+              // THÊM zIndex: 20 và cursor pointer để chắc chắn bấm được
+              style={{ 
+                width: "100%", 
+                marginTop: "10px", 
+                opacity: loading ? 0.7 : 1, 
+                cursor: loading ? "wait" : "pointer",
+                position: "relative", 
+                zIndex: 20 
+              }}
               onClick={isRegister ? handleRegister : handleLogin}
               disabled={loading}
             >
-              {loading ? "Đang xử lý..." : (isRegister ? "Đăng Ký Ngay" : "Đăng Nhập")}
+              {loading ? "Đang kết nối server..." : (isRegister ? "Đăng Ký Ngay" : "Đăng Nhập")}
             </button>
 
-            <div className="auth-toggle">
+            <div className="auth-toggle" style={{ position: "relative", zIndex: 20, marginTop: "15px" }}>
               {isRegister ? "Đã có tài khoản? " : "Chưa có tài khoản? "}
-              <span onClick={() => { setIsRegister(!isRegister); setError(""); }}>
+              <span 
+                onClick={() => { setIsRegister(!isRegister); setError(""); }}
+                style={{ cursor: "pointer", textDecoration: "underline", color: "#fbbf24" }}
+              >
                 {isRegister ? "Đăng nhập ngay" : "Đăng ký ngay"}
               </span>
             </div>
