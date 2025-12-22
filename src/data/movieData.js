@@ -39,6 +39,8 @@ const qkn_TRAILER = "https://www.youtube.com/embed/6bW9byYRhz8?si=6DlmAYmCQPGBsl
 const nvbkt_TRAILER = "https://www.youtube.com/embed/no2HdwAX8jI?si=IGR0E-JpJxH44cQD";
 const tgkl_TRAILER = "https://www.youtube.com/embed/F175sCpwXbo?si=qv9Q-KirMufFoK4W";
 
+const SAMPLE_SHOWTIMES = ["09:00", "11:30", "14:15", "17:00", "19:45", "22:15"];
+
 export const MOVIES = [
   { id: 1, title: "Bộ Tứ Báo Thủ", image: imgBoTu, price: 90000, duration: "2h 12m", trailer: btbt_TRAILER, desc: "Bộ tứ báo thủ bao gồm Chét-Xi-Cà, Dì Bốn, Cậu Mười Một, Con Kiều chính thức xuất hiện cùng với phi vụ báo thế kỉ." },
   { id: 2, title: "Yêu Nhầm Bạn Thân", image: imgYeuNham, price: 95000, duration: "1h 46m", trailer: ynbt_TRAILER, desc: "Yêu Nhầm Bạn Thân kể câu chuyện tình yêu lãng mạn giữa khung cảnh tuyệt đẹp của Việt Nam." },
@@ -61,10 +63,10 @@ export const MOVIES = [
 ];
 
 export const THEATERS = [
-  { name: "Cinema Star Royal City", address: "72A Nguyễn Trãi, Thanh Xuân, Hà Nội" },
-  { name: "Cinema Star Landmark 81", address: "208 Nguyễn Hữu Cảnh, Bình Thạnh, TP.HCM" },
-  { name: "Cinema Star Đà Nẵng", address: "910A Ngô Quyền, Sơn Trà, Đà Nẵng" },
-  { name: "Cinema Star Cần Thơ", address: "Số 1 Đại lộ Hòa Bình, Ninh Kiều, Cần Thơ" },
+  { id: 1, name: "Cinema Star Royal City", address: "72A Nguyễn Trãi, Thanh Xuân, Hà Nội", showtimes: SAMPLE_SHOWTIMES },
+  { id: 2, name: "Cinema Star Landmark 81", address: "208 Nguyễn Hữu Cảnh, Bình Thạnh, TP.HCM", showtimes: SAMPLE_SHOWTIMES },
+  { id: 3, name: "Cinema Star Đà Nẵng", address: "910A Ngô Quyền, Sơn Trà, Đà Nẵng", showtimes: SAMPLE_SHOWTIMES },
+  { id: 4, name: "Cinema Star Cần Thơ", address: "Số 1 Đại lộ Hòa Bình, Ninh Kiều, Cần Thơ", showtimes: SAMPLE_SHOWTIMES },
 ];
 
 export const TOTAL_SEATS = Array.from({ length: 64 }, (_, i) => i);
