@@ -1,26 +1,28 @@
-// src/components/Navbar.jsx
 import React from 'react';
+import '../App.css'; // Đảm bảo import đúng file CSS
 
-const Navbar = ({ activeTab, setActiveTab }) => {
-  const tabs = [
-    { id: 'movies', label: 'Phim' },
-    { id: 'theaters', label: 'Rạp' },
-    { id: 'members', label: 'Thành viên' },
-    { id: 'rules', label: 'Luật' },
+const Navbar = ({ activeTab, setActiveTab, setShowLogin }) => {
+  // Danh sách các mục menu để render cho gọn
+  const navItems = [
+    { id: 'phim', label: 'PHIM' },
+    { id: 'rap', label: 'RẠP' },
+    { id: 'member', label: 'THÀNH VIÊN' },
+    { id: 'luat', label: 'LUẬT' },
   ];
 
   return (
-    <nav className="nav-menu">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
-          onClick={() => setActiveTab(tab.id)}
-        >
-          {tab.label}
-        </button>
+    <ul className="nav-menu">
+      {navItems.map((item) => (
+        <li key={item.id}>
+          <button
+            className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(item.id)}
+          >
+            {item.label}
+          </button>
+        </li>
       ))}
-    </nav>
+    </ul>
   );
 };
 
