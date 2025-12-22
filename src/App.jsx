@@ -6,7 +6,7 @@ import BookingFlow from "./pages/BookingFlow";
 import Theaters from "./pages/Theaters";
 import Members from "./pages/Members";
 import Rules from "./pages/Rules";
-import AdminDashboard from "./pages/AdminDashBoard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   const [activeTab, setActiveTab] = useState("movies");
