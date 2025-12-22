@@ -1,28 +1,69 @@
-import { useState } from "react";
-import "./App.css";
+// src/App.jsx
+import { useState, useEffect } from 'react';
+import './App.css';
 
-import Navbar from "./components/Navbar";
-import BookingFlow from "./pages/BookingFlow";
-import Theaters from "./pages/Theaters";
-import Members from "./pages/Members";
-import Rules from "./pages/Rules";
-import AdminDashboard from "./pages/AdminDashboard";
+// Import các components
+import Navbar from './components/Navbar';
+import AuthModal from './components/AuthModal';
+
+// Import các trang
+import BookingFlow from './pages/BookingFlow';
+import Theaters from './pages/Theaters';
+import Members from './pages/Members';
+import Rules from './pages/Rules';
+import AdminDashboard from './pages/AdminDashboard'; // Đảm bảo bạn đã có file này
 
 function App() {
-  const [activeTab, setActiveTab] = useState("movies");
+  // State quản lý tab nội dung
+  const [activeTab, setActiveTab] = useState('movies');
+  
+  // State quản lý User & Auth
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isAdminView, setIsAdminView] = useState(false); // State chuyển đổi giao diện Admin
 
+  // Tự động đăng nhập nếu có lưu trong localStorage
+  useEffect(() => {
+    const savedUser = localStorage.getItem('currentUserSession');
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  // Xử lý khi đăng nhập thành công
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
+    localStorage.setItem('currentUserSession', JSON.stringify(user));
+    setIsAuthOpen(false);
+  };
+
+  // Xử lý đăng xuất
+  const handleLogout = () => {
+    if (window.confirm('Bạn có chắc muốn đăng xuất?')) {
+      setCurrentUser(null);
+      setIsAdminView(false); // Thoát khỏi trang Admin
+      localStorage.removeItem('currentUserSession');
+      setActiveTab('movies'); // Quay về trang chủ
+    }
+  };
+
+  // Hàm render nội dung chính
   const renderContent = () => {
+    // 1. Nếu đang ở chế độ Admin (và user đúng là admin) thì hiện Dashboard
+    if (isAdminView && currentUser?.role === 'admin') {
+      return <AdminDashboard />;
+    }
+
+    // 2. Nếu không thì hiện các tab bình thường
     switch (activeTab) {
-      case "movies":
+      case 'movies':
         return <BookingFlow />;
-      case "theaters":
+      case 'theaters':
         return <Theaters />;
-      case "members":
+      case 'members':
         return <Members />;
-      case "rules":
+      case 'rules':
         return <Rules />;
-      case "admin":
-        return <AdminDashboard />;
       default:
         return <BookingFlow />;
     }
@@ -30,28 +71,35 @@ function App() {
 
   return (
     <div className="container">
-      <header className="app-header">
-        <h1
-          style={{ cursor: "pointer" }}
-          onClick={() => setActiveTab("movies")}
+      <header>
+        <h1 
+          style={{ cursor: 'pointer' }} 
+          onClick={() => { setActiveTab('movies'); setIsAdminView(false); }}
         >
           CINEMA STAR
         </h1>
-        {/* Hidden/Subtle Admin Toggle */}
-        <button
-          className="admin-toggle-btn"
-          onClick={() => setActiveTab("admin")}
-        >
-          Admin
-        </button>
       </header>
 
-      {/* Hide Navbar when in Admin mode to keep the dashboard clean */}
-      {activeTab !== "admin" && (
-        <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
-      )}
+      {/* Navbar nhận thêm các props mới để xử lý Auth và Admin */}
+      <Navbar 
+        activeTab={activeTab} 
+        setActiveTab={(tab) => { setActiveTab(tab); setIsAdminView(false); }} 
+        user={currentUser}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onLogout={handleLogout}
+        onGoToAdmin={(shouldGo) => setIsAdminView(shouldGo)}
+      />
 
-      <div className="content-area">{renderContent()}</div>
+      <div className="content-area">
+        {renderContent()}
+      </div>
+
+      {/* Modal đăng nhập nằm đè lên tất cả */}
+      <AuthModal 
+        isOpen={isAuthOpen} 
+        onClose={() => setIsAuthOpen(false)} 
+        onLoginSuccess={handleLoginSuccess}
+      />
     </div>
   );
 }
