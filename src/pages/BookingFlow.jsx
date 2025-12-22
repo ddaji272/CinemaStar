@@ -2,45 +2,54 @@
 import React, { useState } from 'react';
 import { MOVIES, TOTAL_SEATS } from '../data/movieData';
 
-// Import các component con bạn vừa tạo
+// Import các component con
 import TheaterSelection from '../components/Booking/TheaterSelection';
 import SeatSelection from '../components/Booking/SeatSelection';
 import PaymentInfo from '../components/Booking/PaymentInfo';
+import FormatSelection from '../components/Booking/FormatSelection';
 
 const BookingFlow = () => {
   // --- STATE QUẢN LÝ LUỒNG ĐẶT VÉ ---
-  const [step, setStep] = useState(0); // 0: Home, 1: Rạp, 2: Ghế, 3: Thanh toán
+  // 0: Home -> 1: Format -> 2: Rạp -> 3: Ghế -> 4: Thanh toán
+  const [step, setStep] = useState(0); 
+  
   const [bookingData, setBookingData] = useState({
     movie: null,
+    format: null,
     theater: null,
     showtime: null,
     seats: []
   });
-  const [occupiedSeats, setOccupiedSeats] = useState([]); // Giả lập ghế đã đặt
+  const [occupiedSeats, setOccupiedSeats] = useState([]);
 
   // --- STATE QUẢN LÝ UI (MODAL, SEARCH) ---
   const [searchTerm, setSearchTerm] = useState('');
-  const [playingTrailer, setPlayingTrailer] = useState(null); // Modal Trailer
-  const [viewingDetails, setViewingDetails] = useState(null); // Modal Chi tiết
+  const [playingTrailer, setPlayingTrailer] = useState(null);
+  const [viewingDetails, setViewingDetails] = useState(null);
 
   // --- LOGIC ĐẶT VÉ (BOOKING ACTIONS) ---
 
-  // B1: Từ trang chủ -> Nhấn "MUA VÉ" (hoặc từ Modal chi tiết)
+  // B1: Từ Home -> Chọn Phim xong -> Sang bước 1 (Chọn Định dạng)
   const handleStartBooking = (movie) => {
-    setBookingData({ movie, theater: null, showtime: null, seats: [] });
-    setViewingDetails(null); // Tắt modal chi tiết nếu đang mở
-    setStep(1); // Chuyển sang bước chọn rạp
+    setBookingData({ movie, format: null, theater: null, showtime: null, seats: [] });
+    setViewingDetails(null);
+    setStep(1); 
   };
 
-  // B2: Chọn Rạp & Suất -> Sang bước chọn ghế
-  const handleSelectSession = (theater, showtime) => {
-    setBookingData(prev => ({ ...prev, theater, showtime }));
-    // Giả lập random ghế đã có người ngồi
-    setOccupiedSeats(TOTAL_SEATS.filter(() => Math.random() < 0.25));
+  // B2: Chọn Format xong -> Sang bước 2 (Chọn Rạp)
+  const handleSelectFormat = (format) => {
+    setBookingData(prev => ({ ...prev, format }));
     setStep(2);
   };
 
-  // B3: Chọn ghế
+  // B3: Chọn Rạp & Suất xong -> Sang bước 3 (Chọn Ghế)
+  const handleSelectSession = (theater, showtime) => {
+    setBookingData(prev => ({ ...prev, theater, showtime }));
+    setOccupiedSeats(TOTAL_SEATS.filter(() => Math.random() < 0.25)); // Random ghế ảo
+    setStep(3);
+  };
+
+  // Logic chọn ghế
   const handleSeatClick = (seatId) => {
     if (occupiedSeats.includes(seatId)) return;
     setBookingData(prev => {
@@ -52,16 +61,14 @@ const BookingFlow = () => {
     });
   };
 
-  // B4: Thanh toán thành công
+  // B4: Thanh toán thành công -> Về lại trang chủ
   const handlePaymentSuccess = () => {
-    alert(`Thanh toán thành công!\nPhim: ${bookingData.movie.title}\nTổng tiền: ${(bookingData.seats.length * bookingData.movie.price).toLocaleString()}đ`);
-    // Reset về ban đầu
+    alert(`Thanh toán thành công!\nPhim: ${bookingData.movie.title}\nĐịnh dạng: ${bookingData.format}\nTổng tiền: ${(bookingData.seats.length * bookingData.movie.price).toLocaleString()}đ`);
     setBookingData({ movie: null, theater: null, showtime: null, seats: [] });
     setStep(0);
   };
 
-  // --- LOGIC RENDER MODAL (GIỮ NGUYÊN CODE CŨ CỦA BẠN) ---
-
+  // --- RENDER MODAL (GIỮ NGUYÊN) ---
   const renderTrailerModal = () => {
     if (!playingTrailer) return null;
     return (
@@ -95,7 +102,6 @@ const BookingFlow = () => {
                 {viewingDetails.desc}
               </div>
               <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
-                {/* Nút Đặt vé trong Modal cũng gọi hàm handleStartBooking */}
                 <button className="btn-checkout" onClick={() => handleStartBooking(viewingDetails)}>ĐẶT VÉ NGAY</button>
                 <button className="btn-back" style={{ marginBottom: 0 }} onClick={() => { setPlayingTrailer(viewingDetails.trailer); setViewingDetails(null); }}>XEM TRAILER</button>
               </div>
@@ -106,21 +112,33 @@ const BookingFlow = () => {
     );
   };
 
-  // --- MAIN RENDER (ĐIỀU HƯỚNG CÁC BƯỚC) ---
+  // --- MAIN RENDER (ĐÃ SỬA LẠI ĐÚNG THỨ TỰ) ---
 
-  // STEP 1: CHỌN RẠP
+  // STEP 1: CHỌN ĐỊNH DẠNG (MỚI THÊM)
   if (step === 1) {
+    return (
+      <FormatSelection 
+        movie={bookingData.movie}
+        onBack={() => setStep(0)}
+        onSelectFormat={handleSelectFormat}
+      />
+    );
+  }
+
+  // STEP 2: CHỌN RẠP (Cập nhật props nhận format)
+  if (step === 2) {
     return (
       <TheaterSelection 
         movie={bookingData.movie} 
-        onBack={() => setStep(0)}
+        selectedFormat={bookingData.format} // <-- Quan trọng: Truyền format đã chọn
+        onBack={() => setStep(1)} // Quay lại chọn Format
         onSelectSession={handleSelectSession}
       />
     );
   }
 
-  // STEP 2: CHỌN GHẾ
-  if (step === 2) {
+  // STEP 3: CHỌN GHẾ
+  if (step === 3) {
     return (
       <SeatSelection 
         movie={bookingData.movie}
@@ -129,24 +147,24 @@ const BookingFlow = () => {
         selectedSeats={bookingData.seats}
         occupiedSeats={occupiedSeats}
         onSeatClick={handleSeatClick}
-        onBack={() => setStep(1)}
-        onNext={() => setStep(3)}
+        onBack={() => setStep(2)} // Quay lại chọn Rạp
+        onNext={() => setStep(4)} // Sang thanh toán
       />
     );
   }
 
-  // STEP 3: THANH TOÁN
-  if (step === 3) {
+  // STEP 4: THANH TOÁN
+  if (step === 4) {
     return (
       <PaymentInfo 
         bookingData={bookingData}
-        onBack={() => setStep(2)}
+        onBack={() => setStep(3)} // Quay lại chọn ghế
         onConfirm={handlePaymentSuccess}
       />
     );
   }
 
-  // STEP 0: TRANG CHỦ (LIST PHIM)
+  // STEP 0: TRANG CHỦ
   const filteredMovies = MOVIES.filter(m => m.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
@@ -166,7 +184,6 @@ const BookingFlow = () => {
           {filteredMovies.map(movie => (
             <div key={movie.id} className="movie-card">
               <div className="poster-wrapper">
-                {/* Click vào poster xem trailer */}
                 <img 
                   src={movie.image} 
                   alt={movie.title} 
@@ -175,7 +192,6 @@ const BookingFlow = () => {
                   style={{ cursor: 'pointer' }} 
                 />
                 <div className="overlay">
-                  {/* Đã khôi phục nút CHI TIẾT */}
                   <button 
                     className="btn-overlay btn-details" 
                     onClick={(e) => { e.stopPropagation(); setViewingDetails(movie); }}
@@ -207,7 +223,6 @@ const BookingFlow = () => {
         </div>
       )}
       
-      {/* Gọi lại Modal ở đây */}
       {renderTrailerModal()}
       {renderDetailsModal()}
     </>
