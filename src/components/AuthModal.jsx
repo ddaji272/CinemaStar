@@ -1,5 +1,6 @@
 // src/components/AuthModal.jsx
 import React, { useState } from 'react';
+import { toast } from 'react-toastify'; // 1. Import toast
 
 const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
   const [isRegister, setIsRegister] = useState(false);
@@ -8,7 +9,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // ⚠️ KIỂM TRA KỸ LINK NÀY (Không được có dấu gạch chéo / ở cuối)
-  const API_URL = "https://LINK-RENDER-CUA-BAN.onrender.com/api/auth";
+  const API_URL = "https://movie-ticket-booking-api-623k.onrender.com/api/auth";
 
   if (!isOpen) return null;
 
@@ -22,23 +23,19 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
     setError('');
     
     // --- 1. VALIDATION (Kiểm tra dữ liệu đầu vào) ---
-    // Kiểm tra tên đăng nhập
     if (!formData.username.trim()) {
       setError('❌ Vui lòng nhập Tên đăng nhập!');
       return;
     }
-    // Kiểm tra mật khẩu
     if (!formData.password.trim()) {
       setError('❌ Vui lòng nhập Mật khẩu!');
       return;
     }
-    // Kiểm tra độ dài mật khẩu (Ví dụ: tối thiểu 3 ký tự)
     if (formData.password.length < 3) {
       setError('❌ Mật khẩu phải có ít nhất 3 ký tự!');
       return;
     }
 
-    // Riêng đăng ký thì kiểm tra thêm nhập lại mật khẩu
     if (isRegister) {
       if (!formData.confirmPass.trim()) {
         setError('❌ Vui lòng nhập xác nhận mật khẩu!');
@@ -54,8 +51,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
     try {
       const endpoint = isRegister ? `${API_URL}/register` : `${API_URL}/login`;
-      console.log("Đang gọi API:", endpoint); // Log để debug
-
+      
       const bodyData = { 
         username: formData.username.trim(), 
         password: formData.password 
@@ -72,23 +68,29 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
       if (response.ok) {
         // --- THÀNH CÔNG ---
         if (isRegister) {
-          alert('✅ Đăng ký thành công! Bạn có thể đăng nhập ngay.');
+          // Thay alert bằng toast.success
+          toast.success('🎉 Đăng ký thành công! Bạn có thể đăng nhập ngay.');
           setIsRegister(false);
           setFormData({ username: '', password: '', confirmPass: '' });
         } else {
-          alert(`✅ Đăng nhập thành công! Xin chào ${data.user.username}`);
+          // Thay alert bằng toast.success
+          toast.success(`🍿 Xin chào ${data.user.username}, chúc bạn xem phim vui vẻ!`);
           onLoginSuccess(data.user);
           onClose();
         }
       } else {
         // --- LỖI TỪ SERVER ---
-        // Hiện thông báo lỗi chính xác từ Backend trả về
-        setError(`⚠️ ${data.message || 'Có lỗi xảy ra'}`);
+        const msg = data.message || 'Có lỗi xảy ra';
+        setError(`⚠️ ${msg}`);
+        // Có thể hiện thêm toast lỗi nếu muốn nổi bật
+        toast.error(msg); 
       }
 
     } catch (err) {
       console.error("Lỗi kết nối:", err);
-      setError('❌ Không kết nối được Server. (Nếu dùng Render miễn phí, vui lòng chờ 1 phút để Server khởi động lại).');
+      const msg = '❌ Không kết nối được Server. Vui lòng thử lại sau.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
