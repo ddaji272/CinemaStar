@@ -1,9 +1,14 @@
+// src/App.jsx
 import { useState } from 'react';
 import Navbar from './components/Navbar';
 import './App.css';
 
+// --- 1. IMPORT THƯ VIỆN TOASTIFY ---
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+// -----------------------------------
+
 // --- IMPORT CÁC TRANG (PAGES) ---
-// Đảm bảo tên file trong thư mục 'pages' viết hoa chữ cái đầu đúng như thế này
 import BookingFlow from './pages/BookingFlow'; 
 import Theaters from './pages/Theaters';       
 import Members from './pages/Members';         
@@ -15,6 +20,22 @@ function App() {
 
   return (
     <div className="App">
+      {/* --- 2. CẤU HÌNH KHUNG HIỂN THỊ THÔNG BÁO --- */}
+      {/* Khung này sẽ nằm ẩn, chỉ hiện khi bạn gọi lệnh toast() */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}       // Tự tắt sau 3 giây
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"           // Giao diện tối (Dark mode)
+      />
+      {/* ------------------------------------------- */}
+
       <header>
         <h1 className="logo">CINEMA STAR</h1>
         
@@ -28,7 +49,7 @@ function App() {
       <div className="container">
         {/* --- KHU VỰC HIỂN THỊ NỘI DUNG THEO TAB --- */}
 
-        {/* 1. Tab PHIM: Gọi BookingFlow (Chứa logic Tìm kiếm, List phim, Mua vé, Chi tiết) */}
+        {/* 1. Tab PHIM: Gọi BookingFlow */}
         {activeTab === 'phim' && <BookingFlow />}
 
         {/* 2. Tab RẠP: Hiển thị danh sách rạp */}
