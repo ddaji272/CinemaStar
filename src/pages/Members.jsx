@@ -1,6 +1,6 @@
 // src/pages/Members.jsx
 import { useState, useEffect } from "react";
-import { toast } from "react-toastify"; // Import thư viện thông báo đẹp
+import { toast } from "react-toastify";
 
 const API_BASE = "https://cinestarbackend.onrender.com";
 
@@ -10,117 +10,122 @@ const Members = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
+  // State: Chế độ chỉnh sửa thông tin
+  const [isEditing, setIsEditing] = useState(false); 
+
   // State dữ liệu người dùng
   const [currentUser, setCurrentUser] = useState(null);
+  
+  // Form đăng nhập/đăng ký
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: ""
+    fullName: "", email: "", password: "", confirmPassword: ""
   });
 
-  // Kiểm tra xem đã đăng nhập chưa khi vào trang
+  // Form chỉnh sửa thông tin cá nhân (Profile)
+  const [editProfile, setEditProfile] = useState({
+    fullName: "", phoneNumber: "", address: ""
+  });
+
+  // 1. Load user từ localStorage khi vào trang
   useEffect(() => {
     const savedUser = localStorage.getItem("user_info");
     if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setCurrentUser(parsedUser);
+      // Nạp dữ liệu vào form sửa luôn để sẵn sàng
+      setEditProfile({
+        fullName: parsedUser.name || "",
+        phoneNumber: parsedUser.phoneNumber || "",
+        address: parsedUser.address || ""
+      });
     }
   }, []);
 
-  // Hàm nhập liệu form
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError(""); 
   };
 
-  // 2. Xử lý ĐĂNG KÝ
-  const handleRegister = async () => {
-    if (!formData.fullName || !formData.email || !formData.password) {
-      setError("Vui lòng nhập đầy đủ thông tin");
-      return;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp");
-      return;
-    }
+  // Xử lý nhập liệu khi sửa Profile
+  const handleEditChange = (e) => {
+    setEditProfile({ ...editProfile, [e.target.name]: e.target.value });
+  };
 
+  // --- LOGIC MỚI: CẬP NHẬT THÔNG TIN ---
+  const handleUpdateProfile = async () => {
     setLoading(true);
-    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/update/${currentUser.userId}`, {
+        method: "PUT", // Dùng PUT để cập nhật
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editProfile),
+      });
 
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.msg || "Lỗi cập nhật");
+
+      // Cập nhật thành công
+      toast.success("💾 Đã lưu thông tin mới!");
+      
+      // 1. Cập nhật state hiển thị
+      setCurrentUser(data.user);
+      // 2. Cập nhật localStorage để F5 không bị mất
+      localStorage.setItem("user_info", JSON.stringify(data.user));
+      
+      setIsEditing(false); // Tắt chế độ sửa
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- LOGIC ĐĂNG KÝ (Giữ nguyên) ---
+  const handleRegister = async () => {
+    if (!formData.fullName || !formData.email || !formData.password) { setError("Thiếu thông tin"); return; }
+    if (formData.password !== formData.confirmPassword) { setError("Mật khẩu không khớp"); return; }
+    setLoading(true); setError("");
     try {
       const res = await fetch(`${API_BASE}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email,
-          password: formData.password
-        }),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName: formData.fullName, email: formData.email, password: formData.password }),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.msg || "Đăng ký thất bại");
-      }
-
-      toast.success("🎉 Đăng ký thành công! Bạn có thể đăng nhập ngay.");
-      
-      setIsRegister(false);
-      setFormData(prev => ({ ...prev, password: "", confirmPassword: "" }));
-    } catch (err) {
-      setError(err.message || "Lỗi kết nối server");
-      toast.error(err.message || "Đăng ký thất bại");
-    } finally {
-      setLoading(false);
-    }
+      if (!res.ok) throw new Error(data.msg);
+      toast.success("🎉 Đăng ký thành công!");
+      setIsRegister(false); setFormData(prev => ({ ...prev, password: "", confirmPassword: "" }));
+    } catch (err) { toast.error(err.message); } finally { setLoading(false); }
   };
 
-  // 3. Xử lý ĐĂNG NHẬP
+  // --- LOGIC ĐĂNG NHẬP (Giữ nguyên) ---
   const handleLogin = async () => {
-    if (!formData.email || !formData.password) {
-      setError("Vui lòng nhập email và mật khẩu");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
+    if (!formData.email || !formData.password) { setError("Nhập email/pass"); return; }
+    setLoading(true); setError("");
     try {
       const res = await fetch(`${API_BASE}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        }),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.msg || "Đăng nhập thất bại");
-      }
-
+      if (!res.ok) throw new Error(data.msg);
+      
       localStorage.setItem("user_info", JSON.stringify(data));
       setCurrentUser(data);
-      
-      toast.success(`🍿 Đăng nhập thành công! Xin chào ${data.name}`);
-
-    } catch (err) {
-      setError(err.message || "Lỗi kết nối server");
-      toast.error(err.message || "Đăng nhập thất bại");
-    } finally {
-      setLoading(false);
-    }
+      // Nạp dữ liệu mới vào form sửa
+      setEditProfile({
+        fullName: data.name || "",
+        phoneNumber: data.phoneNumber || "",
+        address: data.address || ""
+      });
+      toast.success(`🍿 Xin chào ${data.name}`);
+    } catch (err) { toast.error(err.message); } finally { setLoading(false); }
   };
 
-  // 4. Xử lý ĐĂNG XUẤT
   const handleLogout = () => {
     localStorage.removeItem("user_info");
     setCurrentUser(null);
-    setFormData({ fullName: "", email: "", password: "", confirmPassword: "" });
-    toast.info("Đã đăng xuất tài khoản");
+    setIsEditing(false);
+    toast.info("Đã đăng xuất");
   };
 
   return (
@@ -128,109 +133,114 @@ const Members = () => {
       <div className="login-box" style={{ position: "relative", zIndex: 10 }}>
         
         {currentUser ? (
-          <div style={{ textAlign: "center", color: "white" }}>
-            <h2 style={{ color: "#fbbf24", marginBottom: "20px" }}>
-              XIN CHÀO, {currentUser.name ? currentUser.name.toUpperCase() : "BẠN"}
+          // === GIAO DIỆN KHI ĐÃ ĐĂNG NHẬP (PROFILE) ===
+          <div style={{ color: "white" }}>
+            <h2 style={{ color: "#fbbf24", textAlign: "center", marginBottom: "10px" }}>
+              HỒ SƠ THÀNH VIÊN
             </h2>
-            <div style={{ fontSize: "5rem", marginBottom: "20px" }}>🤴</div>
-            <p style={{ color: "#a0aec0", marginBottom: "5px" }}>Vai trò: <span style={{color: "white"}}>{currentUser.role}</span></p>
-            <p style={{ color: "#a0aec0" }}>ID: <span style={{fontSize: "0.8rem"}}>{currentUser.userId}</span></p>
             
-            <button
-              className="btn-checkout"
-              style={{ width: "100%", marginTop: "30px", backgroundColor: "#e50914", cursor: "pointer", position: "relative", zIndex: 20 }}
-              onClick={handleLogout}
-            >
-              Đăng Xuất
-            </button>
+            <div style={{ textAlign: "center", fontSize: "4rem", marginBottom: "10px" }}>
+              {isEditing ? "📝" : "🤴"}
+            </div>
+
+            {/* --- FORM THÔNG TIN --- */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+              
+              {/* 1. HỌ TÊN */}
+              <div>
+                <label style={{color: "#a0aec0", fontSize: "0.85rem"}}>Họ và tên</label>
+                {isEditing ? (
+                  <input type="text" name="fullName" className="profile-input" value={editProfile.fullName} onChange={handleEditChange} />
+                ) : (
+                  <div style={{fontSize: "1.1rem", fontWeight: "bold"}}>{currentUser.name}</div>
+                )}
+              </div>
+
+              {/* 2. SỐ ĐIỆN THOẠI */}
+              <div>
+                <label style={{color: "#a0aec0", fontSize: "0.85rem"}}>Số điện thoại</label>
+                {isEditing ? (
+                  <input type="text" name="phoneNumber" className="profile-input" placeholder="Chưa cập nhật..." value={editProfile.phoneNumber} onChange={handleEditChange} />
+                ) : (
+                  <div style={{color: currentUser.phoneNumber ? "white" : "#718096"}}>
+                    {currentUser.phoneNumber || "(Chưa có số điện thoại)"}
+                  </div>
+                )}
+              </div>
+
+              {/* 3. ĐỊA CHỈ */}
+              <div>
+                <label style={{color: "#a0aec0", fontSize: "0.85rem"}}>Địa chỉ</label>
+                {isEditing ? (
+                  <input type="text" name="address" className="profile-input" placeholder="Chưa cập nhật..." value={editProfile.address} onChange={handleEditChange} />
+                ) : (
+                  <div style={{color: currentUser.address ? "white" : "#718096"}}>
+                    {currentUser.address || "(Chưa có địa chỉ)"}
+                  </div>
+                )}
+              </div>
+
+              {/* 4. EMAIL (Không cho sửa) */}
+              <div>
+                <label style={{color: "#a0aec0", fontSize: "0.85rem"}}>Email (Cố định)</label>
+                <div style={{color: "#718096"}}>{currentUser.email}</div>
+              </div>
+
+            </div>
+
+            {/* --- CÁC NÚT BẤM --- */}
+            <div style={{ display: "flex", gap: "10px", marginTop: "25px" }}>
+              {isEditing ? (
+                <>
+                  <button onClick={handleUpdateProfile} className="btn-save" disabled={loading}>
+                    {loading ? "Đang lưu..." : "Lưu thay đổi"}
+                  </button>
+                  <button onClick={() => setIsEditing(false)} className="btn-cancel">
+                    Hủy
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => setIsEditing(true)} className="btn-edit">
+                  Chỉnh sửa hồ sơ
+                </button>
+              )}
+            </div>
+
+            {!isEditing && (
+              <button className="btn-logout" onClick={handleLogout}>
+                Đăng Xuất
+              </button>
+            )}
           </div>
         ) : (
+          // === GIAO DIỆN KHI CHƯA ĐĂNG NHẬP (Giữ nguyên code cũ) ===
           <>
-            {/* --- ĐÃ SỬA LỖI Ở ĐÂY --- */}
-            <h2
-              style={{
-                color: isRegister ? "#fbbf24" : "#e50914",
-                marginBottom: "20px",
-              }}
-            >
+            <h2 style={{ color: isRegister ? "#fbbf24" : "#e50914", marginBottom: "20px" }}>
               {isRegister ? "Đăng Ký Thành Viên" : "Đăng Nhập"}
             </h2>
-
-            {error && (
-              <p style={{ color: "#ff4d4f", background: "rgba(255,0,0,0.1)", padding: "8px", borderRadius: "4px", fontSize: "0.9rem", border: "1px solid #ff4d4f" }}>
-                ⚠️ {error}
-              </p>
-            )}
-
-            {isRegister && (
-              <div className="input-group">
-                <label>Họ và Tên</label>
-                <input 
-                  type="text" name="fullName" placeholder="Nhập họ tên..." 
-                  value={formData.fullName} onChange={handleInputChange}
-                />
-              </div>
-            )}
-
-            <div className="input-group">
-              <label>Tài khoản / Email</label>
-              <input 
-                type="email" name="email" placeholder="Nhập email..." 
-                value={formData.email} onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="input-group">
-              <label>Mật khẩu</label>
-              <input 
-                type="password" name="password" placeholder="Nhập mật khẩu..." 
-                value={formData.password} onChange={handleInputChange}
-              />
-            </div>
-
-            {isRegister && (
-              <div className="input-group">
-                <label>Nhập lại Mật khẩu</label>
-                <input 
-                  type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu..." 
-                  value={formData.confirmPassword} onChange={handleInputChange}
-                />
-              </div>
-            )}
-
-            <button
-              className="btn-checkout"
-              style={{ 
-                width: "100%", marginTop: "10px", 
-                opacity: loading ? 0.7 : 1, 
-                cursor: loading ? "wait" : "pointer",
-                position: "relative", zIndex: 20 
-              }}
-              onClick={isRegister ? handleRegister : handleLogin}
-              disabled={loading}
-            >
-              {loading ? "Đang kết nối server..." : (isRegister ? "Đăng Ký Ngay" : "Đăng Nhập")}
+            {error && <p style={{ color: "#ff4d4f", border: "1px solid red", padding: "5px" }}>{error}</p>}
+            
+            {isRegister && <input type="text" name="fullName" placeholder="Họ tên..." className="search-input" style={{width: '100%', marginBottom: '10px'}} value={formData.fullName} onChange={handleInputChange} />}
+            <input type="email" name="email" placeholder="Email..." className="search-input" style={{width: '100%', marginBottom: '10px'}} value={formData.email} onChange={handleInputChange} />
+            <input type="password" name="password" placeholder="Mật khẩu..." className="search-input" style={{width: '100%', marginBottom: '10px'}} value={formData.password} onChange={handleInputChange} />
+            {isRegister && <input type="password" name="confirmPassword" placeholder="Nhập lại mật khẩu..." className="search-input" style={{width: '100%', marginBottom: '10px'}} value={formData.confirmPassword} onChange={handleInputChange} />}
+            
+            <button className="btn-checkout" style={{width: '100%', marginTop: '10px'}} onClick={isRegister ? handleRegister : handleLogin} disabled={loading}>
+              {loading ? "Đang xử lý..." : (isRegister ? "Đăng Ký" : "Đăng Nhập")}
             </button>
-
-            <div className="auth-toggle" style={{ position: "relative", zIndex: 20, marginTop: "15px" }}>
-              {isRegister ? "Đã có tài khoản? " : "Chưa có tài khoản? "}
-              <span 
-                onClick={() => { setIsRegister(!isRegister); setError(""); }}
-                style={{ cursor: "pointer", textDecoration: "underline", color: "#fbbf24" }}
-              >
-                {isRegister ? "Đăng nhập ngay" : "Đăng ký ngay"}
-              </span>
-            </div>
+            
+            <p style={{marginTop: "15px", cursor: "pointer", color: "#fbbf24", textDecoration: "underline"}} onClick={() => setIsRegister(!isRegister)}>
+              {isRegister ? "Đã có tài khoản? Đăng nhập" : "Chưa có tài khoản? Đăng ký ngay"}
+            </p>
           </>
         )}
       </div>
 
+      {/* --- PHẦN QUYỀN LỢI (Giữ nguyên) --- */}
       <div className="benefits-box">
         <div className="vip-header">
-          <h2 style={{ color: "#fbbf24", margin: 0 }}>QUYỀN LỢI VIP</h2>
-          <span style={{ background: "#fbbf24", color: "black", padding: "5px 10px", borderRadius: "4px", fontWeight: "bold", fontSize: "0.8rem" }}>
-            MEMBER
-          </span>
+           <h2 style={{ color: "#fbbf24", margin: 0 }}>QUYỀN LỢI VIP</h2>
+           <span className="badge-member">MEMBER</span>
         </div>
         <div className="vip-grid">
           {[
@@ -251,6 +261,34 @@ const Members = () => {
           ))}
         </div>
       </div>
+
+      {/* --- CSS NỘI BỘ CHO PHẦN PROFILE --- */}
+      <style>{`
+        .profile-input {
+          width: 100%;
+          padding: 8px;
+          border-radius: 4px;
+          border: 1px solid #4a5568;
+          background: #2d3748;
+          color: white;
+          outline: none;
+        }
+        .profile-input:focus { border-color: #fbbf24; }
+        
+        .btn-edit { background: #4a5568; color: white; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-edit:hover { background: #718096; }
+        
+        .btn-save { background: #38a169; color: white; flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-save:hover { background: #2f855a; }
+        
+        .btn-cancel { background: #e53e3e; color: white; flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-cancel:hover { background: #c53030; }
+
+        .btn-logout { width: 100%; margin-top: 15px; background: transparent; border: 1px solid #e50914; color: #e50914; padding: 8px; border-radius: 5px; cursor: pointer; }
+        .btn-logout:hover { background: #e50914; color: white; }
+        
+        .badge-member { background: #fbbf24; color: black; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+      `}</style>
     </div>
   );
 };
