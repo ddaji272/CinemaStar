@@ -1,10 +1,13 @@
 // src/App.jsx
-import { useState, useEffect } from 'react'; // Nhớ import useEffect
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import './App.css';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+// --- 1. IMPORT ADMIN DASHBOARD ---
+import AdminDashboard from './pages/AdminDashboard'; 
 
 import BookingFlow from './pages/BookingFlow'; 
 import Theaters from './pages/Theaters';       
@@ -14,10 +17,8 @@ import Rules from './pages/Rules';
 function App() {
   const [activeTab, setActiveTab] = useState('phim');
 
-  // --- 1. STATE QUẢN LÝ NGƯỜI DÙNG (THÊM MỚI) ---
   const [currentUser, setCurrentUser] = useState(null);
 
-  // --- 2. KIỂM TRA ĐĂNG NHẬP KHI MỞ WEB ---
   useEffect(() => {
     const savedUser = localStorage.getItem("user_info");
     if (savedUser) {
@@ -25,11 +26,11 @@ function App() {
     }
   }, []);
 
-  // Hàm này sẽ được gọi từ bên trong trang Members khi user đăng nhập/đăng xuất
   const handleUserChange = (user) => {
     setCurrentUser(user);
-    // Nếu đăng nhập thành công thì tự chuyển về tab đặt vé cho tiện
-    if (user) {
+    // Nếu login là admin thì ở lại trang member để bấm nút quản lý
+    // Nếu là khách thì chuyển về đặt vé
+    if (user && user.role !== 'admin') {
         setActiveTab('phim'); 
     }
   };
@@ -44,7 +45,6 @@ function App() {
 
       <header>
         <h1 className="logo">CINEMA STAR</h1>
-        {/* Truyền user vào Navbar nếu bạn muốn hiển thị tên trên thanh menu */}
         <Navbar 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
@@ -53,9 +53,10 @@ function App() {
       </header>
 
       <div className="container">
-        {/* --- TRUYỀN PROPS XUỐNG CÁC TRANG CON --- */}
+        
+        {/* --- 2. HIỂN THỊ TRANG ADMIN --- */}
+        {activeTab === 'admin' && <AdminDashboard />}
 
-        {/* 1. Tab PHIM: Truyền user để check và hàm chuyển tab */}
         {activeTab === 'phim' && (
             <BookingFlow 
                 currentUser={currentUser} 
@@ -65,9 +66,12 @@ function App() {
 
         {activeTab === 'rap' && <Theaters />}
 
-        {/* 2. Tab THÀNH VIÊN: Truyền hàm cập nhật user để báo ngược lại cho App */}
+        {/* --- 3. TRUYỀN onSwitchTab XUỐNG MEMBERS --- */}
         {activeTab === 'member' && (
-            <Members onUserChange={handleUserChange} />
+            <Members 
+              onUserChange={handleUserChange} 
+              onSwitchTab={setActiveTab} 
+            />
         )}
 
         {activeTab === 'luat' && <Rules />}
