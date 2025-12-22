@@ -1,8 +1,7 @@
+// src/components/Navbar.jsx
 import React from 'react';
-import '../App.css'; // Đảm bảo import đúng file CSS
 
-const Navbar = ({ activeTab, setActiveTab, setShowLogin }) => {
-  // Danh sách các mục menu để render cho gọn
+const Navbar = ({ activeTab, setActiveTab }) => {
   const navItems = [
     { id: 'phim', label: 'PHIM' },
     { id: 'rap', label: 'RẠP' },
@@ -14,6 +13,7 @@ const Navbar = ({ activeTab, setActiveTab, setShowLogin }) => {
     <ul className="nav-menu">
       {navItems.map((item) => (
         <li key={item.id}>
+          {/* Sử dụng button thay vì thẻ a để tránh load lại trang */}
           <button
             className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
             onClick={() => setActiveTab(item.id)}
