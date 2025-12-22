@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Sidebar from "../components/admin/SideBar.jsx";
+import Sidebar from "../components/admin/Sidebar.jsx";
 import ManageMovies from "../components/admin/ManageMovies";
 import ManageCategories from "../components/admin/ManageCategories";
 import ManageUsers from "../components/admin/ManageUsers";
