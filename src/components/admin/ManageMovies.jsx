@@ -9,6 +9,10 @@ const ManageMovies = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  
+  // 1. Thêm state cho Search
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [formData, setFormData] = useState({
     title: "",
     duration: "",
@@ -72,18 +76,40 @@ const ManageMovies = () => {
     }
   };
 
+  // 2. Logic lọc phim theo từ khóa (Search Logic)
+  const filteredMovies = movies.filter((movie) =>
+    movie.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="animate__animated animate__fadeIn">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h3 className="text-white fw-bold mb-0">Quản lý phim</h3>
-        <button
-          className="btn btn-warning fw-bold px-4"
-          style={{ borderRadius: "10px" }}
-          onClick={() => setShowModal(true)}
-        >
-          + Thêm phim mới
-        </button>
+        
+        {/* 3. Khu vực chứa thanh Search và nút Thêm */}
+        <div className="d-flex gap-2">
+            <input 
+                type="text" 
+                className="form-control"
+                placeholder="🔍 Tìm kiếm tên phim..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ 
+                    width: "300px", 
+                    borderRadius: "10px",
+                    border: "none"
+                }}
+            />
+            <button
+            className="btn btn-warning fw-bold px-4"
+            style={{ borderRadius: "10px", whiteSpace: "nowrap" }}
+            onClick={() => setShowModal(true)}
+            >
+            + Thêm phim mới
+            </button>
+        </div>
       </div>
+
       <div
         className="card border-0 p-3"
         style={{
@@ -109,8 +135,9 @@ const ManageMovies = () => {
                     Loading...
                   </td>
                 </tr>
-              ) : (
-                movies.map((movie) => (
+              ) : filteredMovies.length > 0 ? (
+                /* 4. Render danh sách đã lọc (filteredMovies) */
+                filteredMovies.map((movie) => (
                   <tr
                     key={movie._id}
                     style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
@@ -153,6 +180,13 @@ const ManageMovies = () => {
                     </td>
                   </tr>
                 ))
+              ) : (
+                /* 5. Thông báo khi không tìm thấy kết quả */
+                <tr>
+                    <td colSpan="5" className="text-center text-white-50 py-4">
+                        Không tìm thấy phim nào khớp với từ khóa "{searchTerm}"
+                    </td>
+                </tr>
               )}
             </tbody>
           </table>
