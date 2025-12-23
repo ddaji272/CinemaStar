@@ -6,6 +6,10 @@ import CategoryModal from "./modals/CategoryModal";
 const ManageCategories = () => {
   const [categories, setCategories] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  
+  // 1. Thêm state cho Search
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [formData, setFormData] = useState({
     categoryName: "",
     description: "",
@@ -67,18 +71,42 @@ const ManageCategories = () => {
     setShowModal(true);
   };
 
+  // 2. Logic lọc category (Search Logic)
+  // Tìm theo Tên hoặc Mô tả
+  const filteredCategories = categories.filter((cat) =>
+    cat.categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cat.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="animate__animated animate__fadeIn">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h3 className="text-white fw-bold mb-0">Quản lý Thể loại</h3>
-        <button
-          className="btn btn-warning fw-bold px-4"
-          style={{ borderRadius: "10px" }}
-          onClick={openAdd}
-        >
-          + Thêm Thể loại
-        </button>
+        
+        {/* 3. Khu vực Search và Button */}
+        <div className="d-flex gap-2">
+            <input 
+                type="text" 
+                className="form-control"
+                placeholder="🔍 Tìm kiếm thể loại..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ 
+                    width: "300px", 
+                    borderRadius: "10px",
+                    border: "none"
+                }}
+            />
+            <button
+            className="btn btn-warning fw-bold px-4"
+            style={{ borderRadius: "10px", whiteSpace: "nowrap" }}
+            onClick={openAdd}
+            >
+            + Thêm Thể loại
+            </button>
+        </div>
       </div>
+
       <div
         className="card border-0 p-3"
         style={{
@@ -96,28 +124,41 @@ const ManageCategories = () => {
               </tr>
             </thead>
             <tbody>
-              {categories.map((cat) => (
-                <tr key={cat._id}>
-                  <td className="fw-bold text-warning">{cat.categoryName}</td>
-                  <td className="text-white-50">{cat.description}</td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <button
-                        className="btn btn-sm btn-primary"
-                        onClick={() => openEdit(cat)}
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleDelete(cat._id)}
-                      >
-                        Xóa
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {/* 4. Render danh sách đã lọc (filteredCategories) */}
+              {filteredCategories.length > 0 ? (
+                  filteredCategories.map((cat) => (
+                    <tr key={cat._id}>
+                      <td className="fw-bold text-warning">{cat.categoryName}</td>
+                      <td className="text-white-50">{cat.description}</td>
+                      <td>
+                        <div className="d-flex gap-2">
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => openEdit(cat)}
+                          >
+                            Sửa
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleDelete(cat._id)}
+                          >
+                            Xóa
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+              ) : (
+                  /* 5. Thông báo khi không tìm thấy kết quả */
+                  <tr>
+                    <td colSpan="3" className="text-center text-white-50 py-4">
+                      {categories.length === 0 
+                          ? "Chưa có thể loại nào" 
+                          : `Không tìm thấy thể loại nào khớp với "${searchTerm}"`
+                      }
+                    </td>
+                  </tr>
+              )}
             </tbody>
           </table>
         </div>
